@@ -58,11 +58,11 @@ export default function Home() {
         {/* Header */}
         <div className="text-center space-y-6 py-12 sm:py-16">
           <div className="space-y-4">
-            <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900 dark:text-slate-50">
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
               Push Probability Visualizer
             </h1>
             <div className="w-12 h-px mx-auto bg-slate-300 dark:bg-slate-700" />
-            <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 max-w-md mx-auto font-light">
+            <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 max-w-md mx-auto">
               Calculate probability distributions from sports betting market odds
             </p>
           </div>
