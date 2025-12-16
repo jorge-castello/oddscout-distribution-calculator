@@ -92,22 +92,25 @@
 - [x] Install shadcn/ui (or decide on alternative)
   - `npx shadcn@latest init`
   - Install components: Button, Input, Card, Table, Select
-- [ ] Build form component for adding/removing lines
+- [x] Build form component for adding/removing lines
   - Direction dropdown (Over/Under)
   - Line input (number, supports X and X.5)
   - Odds input (American format, e.g., -110, +150)
   - Add/Remove line buttons
-- [ ] Build table component displaying results
+- [x] Build table component displaying results
   - Columns: Outcome, Probability
   - Footer: Total (should sum to 100%)
   - Updates dynamically when inputs change
-- [ ] Integrate library functions from Milestone 1-2
-- [ ] Add basic validation
+- [x] Integrate library functions from Milestone 1-2
+- [ ] Add basic validation (DEFERRED to Milestone 6)
   - Minimum 2 lines required
   - Valid number formats
   - Valid American odds format
-- [ ] Test dynamic updates (add/remove/edit lines)
-- [ ] Document UX decisions and any usability issues discovered
+  - Detect contradictory lines (negative probabilities)
+- [x] Test dynamic updates (add/remove/edit lines)
+- [x] Document UX decisions and any usability issues discovered
+  - Mobile-first design working well
+  - Discovered: Need validation for contradictory lines
 
 ---
 
