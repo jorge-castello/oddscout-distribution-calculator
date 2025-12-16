@@ -114,28 +114,32 @@
 
 ---
 
-## Milestone 4: Graph Visualization
+## Milestone 4: Graph Visualization ✅
 **Learning Focus:** Data presentation, how bettors interpret probability charts
 
-- [ ] Research how bettors use probability distributions
+- [x] Research how bettors use probability distributions
   - What insights do they look for?
   - What makes a chart actionable vs confusing?
-- [ ] Set up Recharts (or alternative: Chart.js, D3)
+- [x] Set up Recharts (or alternative: Chart.js, D3)
   - `npm install recharts`
-- [ ] Build bar chart component
+- [x] Build bar chart component
   - X-axis: Outcome ranges
-  - Y-axis: Probability (0-100%)
-  - Bars with clear labels
-- [ ] Style for clarity
-  - Color scheme (consider colorblind-friendly)
-  - Hover tooltips with exact percentages
-  - Clear axis labels
+  - Bars with clear labels (no Y-axis - cleaner)
+- [x] Style for clarity
+  - Clean black/dark gray bars (matches project theme)
+  - No tooltips (static, non-interactive)
+  - Clear axis labels with proper margins
   - Responsive design
-- [ ] Test with various distributions
+  - Monospace font for percentages (matches table)
+- [x] Test with various distributions
   - Simple (2 lines, consecutive)
-  - Complex (5+ lines, gaps)
-  - Edge cases (very skewed distributions)
-- [ ] Document visualization choices and reasoning
+  - Complex (4 lines, granular)
+  - Gaps (range handling)
+  - Mixed Over/Under
+- [x] Document visualization choices and reasoning
+  - Minimal, non-interactive design
+  - Removed Y-axis for cleaner look
+  - Focus rings removed for static appearance
 
 ---
 
