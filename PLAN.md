@@ -23,15 +23,15 @@
 
 ---
 
-## Milestone 1: Core Library Functions
+## Milestone 1: Core Library Functions ✅
 **Learning Focus:** Odds fundamentals, implied probability
 
-- [ ] Research American odds format (negative vs positive odds)
-- [ ] Understand implied probability formula
+- [x] Research American odds format (negative vs positive odds)
+- [x] Understand implied probability formula
   - How does -110 convert to 52.4%?
   - How does +150 convert to 40%?
   - Why do bookmakers use -110 as standard?
-- [ ] Create `lib/odds.ts` with type definitions
+- [x] Create `lib/odds.ts` with type definitions
   ```typescript
   type Line = {
     direction: 'over' | 'under'
@@ -46,9 +46,9 @@
     max?: number
   }
   ```
-- [ ] Implement `oddsToImpliedProbability(odds: number): number`
-- [ ] Write tests for odds conversion (verify against online calculators)
-- [ ] Document learnings in inline comments
+- [x] Implement `oddsToImpliedProbability(odds: number): number`
+- [x] Write tests for odds conversion (verify against online calculators)
+- [x] Document learnings in inline comments
 
 ---
 
