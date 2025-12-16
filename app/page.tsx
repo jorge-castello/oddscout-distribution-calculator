@@ -1,65 +1,193 @@
-import Image from "next/image";
+'use client'
+
+import { useState } from 'react'
+import { Line } from '@/lib/odds'
+import { calculateProbabilityDistribution } from '@/lib/distribution'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 export default function Home() {
+  // Form state
+  const [direction, setDirection] = useState<'over' | 'under'>('over')
+  const [lineValue, setLineValue] = useState('')
+  const [odds, setOdds] = useState('')
+
+  // Lines state
+  const [lines, setLines] = useState<Line[]>([
+    // Start with Brady's example
+    { direction: 'over', line: 28.5, odds: -110 },
+    { direction: 'over', line: 29.5, odds: 150 }
+  ])
+
+  // Add a new line
+  const handleAddLine = () => {
+    const parsedLine = parseFloat(lineValue)
+    const parsedOdds = parseInt(odds)
+
+    if (isNaN(parsedLine) || isNaN(parsedOdds)) {
+      alert('Please enter valid numbers')
+      return
+    }
+
+    setLines([...lines, {
+      direction,
+      line: parsedLine,
+      odds: parsedOdds
+    }])
+
+    // Reset form
+    setLineValue('')
+    setOdds('')
+  }
+
+  // Remove a line
+  const handleRemoveLine = (index: number) => {
+    setLines(lines.filter((_, i) => i !== index))
+  }
+
+  // Calculate distribution
+  const distribution = lines.length >= 1 ? calculateProbabilityDistribution(lines) : []
+  const total = distribution.reduce((sum, range) => sum + range.probability, 0)
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-4 sm:p-8">
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            Push Probability Visualizer
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-slate-600 dark:text-slate-400">
+            Calculate probability distributions from sports betting market odds
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+
+        {/* Form Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Add Betting Lines</CardTitle>
+            <CardDescription>
+              Enter betting lines from your sportsbook
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Form inputs */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Direction</label>
+                <Select value={direction} onValueChange={(val) => setDirection(val as 'over' | 'under')}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="over">Over</SelectItem>
+                    <SelectItem value="under">Under</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Line</label>
+                <Input
+                  type="number"
+                  step="0.5"
+                  placeholder="28.5"
+                  value={lineValue}
+                  onChange={(e) => setLineValue(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Odds</label>
+                <Input
+                  type="number"
+                  placeholder="-110"
+                  value={odds}
+                  onChange={(e) => setOdds(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <Button
+              onClick={handleAddLine}
+              className="w-full sm:w-auto"
+              size="lg"
+            >
+              + Add Line
+            </Button>
+
+            {/* Current Lines */}
+            {lines.length > 0 && (
+              <div className="space-y-2 pt-4 border-t">
+                <h3 className="text-sm font-medium">Current Lines:</h3>
+                <div className="space-y-2">
+                  {lines.map((line, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-3 rounded-lg"
+                    >
+                      <span className="font-mono text-sm">
+                        {line.direction === 'over' ? 'Over' : 'Under'} {line.line} @ {line.odds > 0 ? '+' : ''}{line.odds}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveLine(index)}
+                        className="h-8 w-8 p-0"
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Results Card */}
+        {distribution.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Probability Distribution</CardTitle>
+              <CardDescription>
+                Calculated from {lines.length} betting line{lines.length !== 1 ? 's' : ''}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-1/2">Outcome</TableHead>
+                    <TableHead className="text-right">Probability</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {distribution.map((range, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium">{range.label}</TableCell>
+                      <TableCell className="text-right font-mono">
+                        {(range.probability * 100).toFixed(2)}%
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TableCell className="font-bold">Total</TableCell>
+                    <TableCell className="text-right font-mono font-bold">
+                      {(total * 100).toFixed(2)}%
+                    </TableCell>
+                  </TableRow>
+                </TableFooter>
+              </Table>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
-  );
+  )
 }
