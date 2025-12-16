@@ -56,13 +56,14 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-4 sm:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+        <div className="text-center space-y-3 py-8">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-slate-900 via-slate-700 to-slate-900 dark:from-slate-100 dark:via-slate-300 dark:to-slate-100 bg-clip-text text-transparent">
             Push Probability Visualizer
           </h1>
-          <p className="text-slate-600 dark:text-slate-400">
+          <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
             Calculate probability distributions from sports betting market odds
           </p>
+          <div className="w-24 h-1 mx-auto bg-gradient-to-r from-transparent via-slate-300 dark:via-slate-700 to-transparent rounded-full" />
         </div>
 
         {/* Form Card */}
