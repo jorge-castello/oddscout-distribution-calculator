@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
 
 export default function Home() {
   // Form state
@@ -190,40 +190,35 @@ export default function Home() {
               </Table>
 
               {/* Chart visualization */}
-              <div className="mt-8 pt-8 border-t">
-                <h3 className="text-sm font-medium mb-4">Visual Distribution</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={distribution.map(range => ({
-                    outcome: range.label,
-                    probability: range.probability * 100
-                  }))}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-800" />
+              <div className="mt-8 pt-8 border-t outline-none focus:outline-none select-none">
+                <ResponsiveContainer width="100%" height={300} className="outline-none focus:outline-none select-none">
+                  <BarChart
+                    data={distribution.map(range => ({
+                      outcome: range.label,
+                      probability: range.probability * 100
+                    }))}
+                    margin={{ left: 10, right: 10, top: 20, bottom: 5 }}
+                    style={{ cursor: 'default' }}
+                  >
                     <XAxis
                       dataKey="outcome"
-                      className="text-xs"
-                      tick={{ fill: 'currentColor' }}
+                      tick={{ fill: 'currentColor', fontFamily: 'inherit' }}
+                      style={{ fontSize: '14px' }}
                     />
-                    <YAxis
-                      label={{ value: 'Probability (%)', angle: -90, position: 'insideLeft' }}
-                      className="text-xs"
-                      tick={{ fill: 'currentColor' }}
-                    />
-                    <Tooltip
-                      formatter={(value: number) => `${value.toFixed(2)}%`}
-                      contentStyle={{
-                        backgroundColor: 'hsl(var(--background))',
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '6px'
+                    <Bar
+                      dataKey="probability"
+                      fill="hsl(var(--foreground))"
+                      radius={[8, 8, 0, 0]}
+                      isAnimationActive={false}
+                      label={{
+                        position: 'top',
+                        formatter: (value: number) => `${value.toFixed(1)}%`,
+                        fill: 'currentColor',
+                        fontFamily: 'ui-monospace, monospace',
+                        fontSize: 13,
+                        fontWeight: 500
                       }}
                     />
-                    <Bar dataKey="probability" radius={[8, 8, 0, 0]}>
-                      {distribution.map((_, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={`hsl(${220 - index * 20}, 70%, 50%)`}
-                        />
-                      ))}
-                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
