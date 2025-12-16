@@ -52,30 +52,30 @@
 
 ---
 
-## Milestone 2: Script POC
+## Milestone 2: Script POC ✅
 **Learning Focus:** Push probability math, distribution calculation
 
-- [ ] Research push probability concept
+- [x] Research push probability concept
   - What is a "push" in sports betting?
   - Why do half-point lines exist (28.5 vs 28)?
   - How do bettors use push probabilities?
-- [ ] Understand the core formula deeply
+- [x] Understand the core formula deeply
   - P(exactly X) = P(Over X-0.5) - P(Over X+0.5)
   - Walk through Brady's example by hand
   - What happens with gaps in lines?
-- [ ] Implement `calculateProbabilityDistribution(lines: Line[]): OutcomeRange[]`
+- [x] Implement `calculateProbabilityDistribution(lines: Line[]): OutcomeRange[]`
   - Handle sorting lines
   - Detect gaps and create ranges
   - Handle both Over and Under directions
-- [ ] Create standalone script (`scripts/poc.ts`)
-- [ ] Test with Brady's example:
+- [x] Create standalone script (`scripts/poc.ts`)
+- [x] Test with Brady's example:
   - Input: Over 28.5 @ -110, Over 29.5 @ +150
   - Expected output: ≤28 (47.6%), 29 (12.4%), ≥30 (40%)
-- [ ] Test with gaps scenario:
+- [x] Test with gaps scenario:
   - Input: Over 25.5 @ -110, Over 27.5 @ +150
   - Expected output: ≤25 (47.6%), 26-27 (12.4%), ≥28 (40%)
-- [ ] Test with mixed Over/Under on same line
-- [ ] Document edge cases discovered
+- [x] Test with mixed Over/Under on same line
+- [x] Document edge cases discovered
 
 ---
 
