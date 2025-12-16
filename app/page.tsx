@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 
 export default function Home() {
   // Form state
@@ -187,6 +188,45 @@ export default function Home() {
                   </TableRow>
                 </TableFooter>
               </Table>
+
+              {/* Chart visualization */}
+              <div className="mt-8 pt-8 border-t">
+                <h3 className="text-sm font-medium mb-4">Visual Distribution</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={distribution.map(range => ({
+                    outcome: range.label,
+                    probability: range.probability * 100
+                  }))}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-800" />
+                    <XAxis
+                      dataKey="outcome"
+                      className="text-xs"
+                      tick={{ fill: 'currentColor' }}
+                    />
+                    <YAxis
+                      label={{ value: 'Probability (%)', angle: -90, position: 'insideLeft' }}
+                      className="text-xs"
+                      tick={{ fill: 'currentColor' }}
+                    />
+                    <Tooltip
+                      formatter={(value: number) => `${value.toFixed(2)}%`}
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--background))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '6px'
+                      }}
+                    />
+                    <Bar dataKey="probability" radius={[8, 8, 0, 0]}>
+                      {distribution.map((_, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={`hsl(${220 - index * 20}, 70%, 50%)`}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </CardContent>
           </Card>
         )}
