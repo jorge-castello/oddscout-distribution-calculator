@@ -82,11 +82,16 @@
 ## Milestone 3: NextJS + Table UI
 **Learning Focus:** User input patterns, validation, dynamic updates
 
-- [ ] Set up NextJS project with TypeScript + Tailwind
+**Design Priority:** Mobile-first! Brady will likely view on phone first.
+- Touch-friendly UI (big buttons, full-width inputs on mobile)
+- Vertical stacked layout on mobile
+- Responsive breakpoints for desktop enhancement
+
+- [x] Set up NextJS project with TypeScript + Tailwind
   - `npx create-next-app@latest oddscout-push-prob --typescript --tailwind --app`
-- [ ] Install shadcn/ui (or decide on alternative)
-  - `npx shadcn-ui@latest init`
-  - Install components: Button, Input, Card, Table
+- [x] Install shadcn/ui (or decide on alternative)
+  - `npx shadcn@latest init`
+  - Install components: Button, Input, Card, Table, Select
 - [ ] Build form component for adding/removing lines
   - Direction dropdown (Over/Under)
   - Line input (number, supports X and X.5)
