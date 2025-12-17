@@ -3,11 +3,14 @@
 import { useState } from 'react'
 import { Line } from '@/lib/odds'
 import { calculateProbabilityDistribution } from '@/lib/distribution'
+import { EXAMPLE_SCENARIOS } from '@/lib/examples'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { Separator } from '@/components/ui/separator'
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
 
 export default function Home() {
@@ -49,6 +52,14 @@ export default function Home() {
     setLines(lines.filter((_, i) => i !== index))
   }
 
+  // Load an example scenario
+  const loadExample = (exampleLines: Line[]) => {
+    setLines(exampleLines)
+    // Reset form inputs
+    setLineValue('')
+    setOdds('')
+  }
+
   // Calculate distribution
   const distribution = lines.length >= 1 ? calculateProbabilityDistribution(lines) : []
   const total = distribution.reduce((sum, range) => sum + range.probability, 0)
@@ -69,63 +80,95 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Form Card */}
+        {/* Quick Start Card */}
         <Card>
           <CardHeader>
-            <CardTitle>Add Betting Lines</CardTitle>
+            <CardTitle>Quick Start</CardTitle>
             <CardDescription>
-              Enter betting lines from your sportsbook
+              Load an example or add lines manually
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Form inputs */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Direction</label>
-                <Select value={direction} onValueChange={(val) => setDirection(val as 'over' | 'under')}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="over">Over</SelectItem>
-                    <SelectItem value="under">Under</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+          <CardContent className="space-y-6">
+            {/* Accordion for examples and manual entry */}
+            <Accordion type="single" collapsible>
+              <AccordionItem value="controls">
+                <AccordionTrigger>Load Example or Add Lines</AccordionTrigger>
+                <AccordionContent className="space-y-6 pt-4">
+                  {/* Examples section */}
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-medium">Load Example:</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {EXAMPLE_SCENARIOS.map((example) => (
+                        <Button
+                          key={example.id}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => loadExample(example.lines)}
+                          className="text-xs"
+                        >
+                          {example.name}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Line</label>
-                <Input
-                  type="number"
-                  step="0.5"
-                  placeholder="28.5"
-                  value={lineValue}
-                  onChange={(e) => setLineValue(e.target.value)}
-                />
-              </div>
+                  <Separator />
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Odds</label>
-                <Input
-                  type="number"
-                  placeholder="-110"
-                  value={odds}
-                  onChange={(e) => setOdds(e.target.value)}
-                />
-              </div>
-            </div>
+                  {/* Manual entry form */}
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-medium">Add Lines Manually:</h3>
 
-            <Button
-              onClick={handleAddLine}
-              className="w-full sm:w-auto"
-              size="lg"
-            >
-              + Add Line
-            </Button>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Direction</label>
+                        <Select value={direction} onValueChange={(val) => setDirection(val as 'over' | 'under')}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="over">Over</SelectItem>
+                            <SelectItem value="under">Under</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-            {/* Current Lines */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Line</label>
+                        <Input
+                          type="number"
+                          step="0.5"
+                          placeholder="28.5"
+                          value={lineValue}
+                          onChange={(e) => setLineValue(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Odds</label>
+                        <Input
+                          type="number"
+                          placeholder="-110"
+                          value={odds}
+                          onChange={(e) => setOdds(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <Button
+                      onClick={handleAddLine}
+                      className="w-full sm:w-auto"
+                      size="lg"
+                    >
+                      + Add Line
+                    </Button>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+
+            {/* Current Lines - Always visible, outside accordion */}
             {lines.length > 0 && (
-              <div className="space-y-2 pt-4 border-t">
+              <div className="space-y-3">
                 <h3 className="text-sm font-medium">Current Lines:</h3>
                 <div className="space-y-2">
                   {lines.map((line, index) => (
