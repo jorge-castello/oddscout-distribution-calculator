@@ -9,7 +9,6 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Separator } from '@/components/ui/separator'
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
 
@@ -18,6 +17,8 @@ export default function Home() {
   const [direction, setDirection] = useState<'over' | 'under'>('over')
   const [lineValue, setLineValue] = useState('')
   const [odds, setOdds] = useState('')
+  const [selectedExample, setSelectedExample] = useState('brady-basic')
+  const [showManualEntry, setShowManualEntry] = useState(false)
 
   // Lines state
   const [lines, setLines] = useState<Line[]>([
@@ -45,6 +46,9 @@ export default function Home() {
     // Reset form
     setLineValue('')
     setOdds('')
+
+    // Collapse manual entry
+    setShowManualEntry(false)
   }
 
   // Remove a line
@@ -60,116 +64,125 @@ export default function Home() {
     setOdds('')
   }
 
+  // Handle example selection from dropdown
+  const handleExampleChange = (exampleId: string) => {
+    setSelectedExample(exampleId)
+    const example = EXAMPLE_SCENARIOS.find(ex => ex.id === exampleId)
+    if (example) {
+      loadExample(example.lines)
+    }
+  }
+
   // Calculate distribution
   const distribution = lines.length >= 1 ? calculateProbabilityDistribution(lines) : []
   const total = distribution.reduce((sum, range) => sum + range.probability, 0)
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-4 sm:p-8">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-900 p-4 sm:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="text-center space-y-6 py-12 sm:py-16">
-          <div className="space-y-4">
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-              Betting Odds Analyzer
-            </h1>
-            <div className="w-12 h-px mx-auto bg-slate-300 dark:bg-slate-700" />
-            <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-              Turn sportsbook odds into probability distributions
-            </p>
-          </div>
+        <div className="text-center space-y-3 pt-4">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+            Betting Odds Analyzer
+          </h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Turn sportsbook odds into probability distributions
+          </p>
         </div>
 
-        {/* Quick Start Card */}
+        {/* Controls Card */}
         <Card>
           <CardHeader>
-            <CardTitle>Quick Start</CardTitle>
+            <CardTitle>Configure Lines</CardTitle>
             <CardDescription>
-              Load an example or add lines manually
+              Load an example or add betting lines manually
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Accordion for examples and manual entry */}
-            <Accordion type="single" collapsible>
-              <AccordionItem value="controls">
-                <AccordionTrigger>Load Example or Add Lines</AccordionTrigger>
-                <AccordionContent className="space-y-6 pt-4">
-                  {/* Examples section */}
-                  <div className="space-y-3">
-                    <h3 className="text-sm font-medium">Load Example:</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {EXAMPLE_SCENARIOS.map((example) => (
-                        <Button
-                          key={example.id}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => loadExample(example.lines)}
-                          className="text-xs"
-                        >
-                          {example.name}
-                        </Button>
-                      ))}
-                    </div>
+            {/* Examples & Add Lines Button */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Examples:</label>
+              <div className="flex gap-2">
+                <Select value={selectedExample} onValueChange={handleExampleChange} className="flex-1">
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Load an example..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EXAMPLE_SCENARIOS.map((example) => (
+                      <SelectItem key={example.id} value={example.id}>
+                        {example.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Button
+                  variant="outline"
+                  size="default"
+                  onClick={() => setShowManualEntry(!showManualEntry)}
+                  className="px-4"
+                >
+                  {showManualEntry ? '−' : '+'}
+                </Button>
+              </div>
+            </div>
+
+            {/* Manual Entry Form - Slides in when button clicked */}
+            {showManualEntry && (
+              <div className="space-y-4 pt-4 border-t">
+                <h3 className="text-lg font-semibold tracking-tight">Add a betting line:</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Direction</label>
+                    <Select value={direction} onValueChange={(val) => setDirection(val as 'over' | 'under')}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="over">Over</SelectItem>
+                        <SelectItem value="under">Under</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
-                  <Separator />
-
-                  {/* Manual entry form */}
-                  <div className="space-y-4">
-                    <h3 className="text-sm font-medium">Add Lines Manually:</h3>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Direction</label>
-                        <Select value={direction} onValueChange={(val) => setDirection(val as 'over' | 'under')}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="over">Over</SelectItem>
-                            <SelectItem value="under">Under</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Line</label>
-                        <Input
-                          type="number"
-                          step="0.5"
-                          placeholder="28.5"
-                          value={lineValue}
-                          onChange={(e) => setLineValue(e.target.value)}
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Odds</label>
-                        <Input
-                          type="number"
-                          placeholder="-110"
-                          value={odds}
-                          onChange={(e) => setOdds(e.target.value)}
-                        />
-                      </div>
-                    </div>
-
-                    <Button
-                      onClick={handleAddLine}
-                      className="w-full sm:w-auto"
-                      size="lg"
-                    >
-                      + Add Line
-                    </Button>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Line</label>
+                    <Input
+                      type="number"
+                      step="0.5"
+                      placeholder="28.5"
+                      value={lineValue}
+                      onChange={(e) => setLineValue(e.target.value)}
+                    />
                   </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
 
-            {/* Current Lines - Always visible, outside accordion */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Odds</label>
+                    <Input
+                      type="number"
+                      placeholder="-110"
+                      value={odds}
+                      onChange={(e) => setOdds(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  onClick={handleAddLine}
+                  className="w-full sm:w-auto"
+                  size="lg"
+                >
+                  + Add Line
+                </Button>
+              </div>
+            )}
+
+            {/* Current Lines - Always visible */}
             {lines.length > 0 && (
               <div className="space-y-3">
-                <h3 className="text-sm font-medium">Current Lines:</h3>
+                <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Current Lines ({lines.length}):
+                </h3>
                 <div className="space-y-2">
                   {lines.map((line, index) => (
                     <div
@@ -205,36 +218,9 @@ export default function Home() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-1/2">Outcome</TableHead>
-                    <TableHead className="text-right">Probability</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {distribution.map((range, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">{range.label}</TableCell>
-                      <TableCell className="text-right font-mono">
-                        {(range.probability * 100).toFixed(2)}%
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-                <TableFooter>
-                  <TableRow>
-                    <TableCell className="font-bold">Total</TableCell>
-                    <TableCell className="text-right font-mono font-bold">
-                      {(total * 100).toFixed(2)}%
-                    </TableCell>
-                  </TableRow>
-                </TableFooter>
-              </Table>
-
               {/* Chart visualization */}
-              <div className="mt-8 pt-8 border-t outline-none focus:outline-none select-none">
-                <ResponsiveContainer width="100%" height={300} className="outline-none focus:outline-none select-none">
+              <div className="outline-none focus:outline-none select-none">
+                <ResponsiveContainer width="100%" height={150} className="outline-none focus:outline-none select-none">
                   <BarChart
                     data={distribution.map(range => ({
                       outcome: range.label,
@@ -264,6 +250,36 @@ export default function Home() {
                     />
                   </BarChart>
                 </ResponsiveContainer>
+              </div>
+
+              {/* Table */}
+              <div className="mt-4 pt-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-1/2">Outcome</TableHead>
+                      <TableHead className="text-right">Probability</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {distribution.map((range, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-medium">{range.label}</TableCell>
+                        <TableCell className="text-right font-mono">
+                          {(range.probability * 100).toFixed(2)}%
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                  <TableFooter>
+                    <TableRow>
+                      <TableCell className="font-bold">Total</TableCell>
+                      <TableCell className="text-right font-mono font-bold">
+                        {(total * 100).toFixed(2)}%
+                      </TableCell>
+                    </TableRow>
+                  </TableFooter>
+                </Table>
               </div>
             </CardContent>
           </Card>

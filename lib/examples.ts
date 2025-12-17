@@ -17,7 +17,7 @@ export type ExampleScenario = {
 export const EXAMPLE_SCENARIOS: ExampleScenario[] = [
   {
     id: 'brady-basic',
-    name: "Brady's Example",
+    name: "Basic Example",
     description: "Basic consecutive lines - perfect for understanding the fundamentals",
     lines: [
       { direction: 'over', line: 28.5, odds: -110 },
@@ -29,8 +29,8 @@ export const EXAMPLE_SCENARIOS: ExampleScenario[] = [
     name: "Gap Scenario",
     description: "Shows range handling when lines skip values (26-27)",
     lines: [
-      { direction: 'over', line: 25.5, odds: -110 },
-      { direction: 'over', line: 27.5, odds: 150 }
+      { direction: 'over', line: 25.5, odds: -150 },
+      { direction: 'over', line: 27.5, odds: 200 }
     ]
   },
   {
