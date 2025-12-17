@@ -143,33 +143,37 @@
 
 ---
 
-## Milestone 5: Examples Sidebar
-**Learning Focus:** Real-world betting scenarios, practical applications
+## Milestone 5: Examples & UI Polish ✅
+**Learning Focus:** Real-world betting scenarios, practical applications, mobile-first design
 
-- [ ] Research 5+ realistic betting scenarios
-  - Look at actual sportsbook lines for inspiration
-  - Understand common betting patterns
-- [ ] **Example 1 (Simple):** NFL Game Total
-  - Over 45.5 @ -110, Over 46.5 @ +120
-  - Clean, consecutive lines
-- [ ] **Example 2 (Medium):** NBA Player Props
-  - Over 27.5 points @ -115, Over 28.5 @ +105, Over 29.5 @ +140
-  - 3-4 lines, shows granular distribution
-- [ ] **Example 3 (Complex):** Multi-line Totals
-  - 5+ lines covering wide range
-  - Shows full distribution curve
-- [ ] **Example 4 (Edge Case):** Gaps in Lines
-  - Over 48.5 @ -110, Over 51.5 @ +130
-  - Demonstrates range outputs (49-51)
-- [ ] **Example 5 (Edge Case):** Contradictory Lines
-  - Over 50.5 @ +200, Over 49.5 @ -300
-  - Demonstrates validation warnings (negative probabilities)
-- [ ] Build sidebar UI component
-  - List of examples with descriptions
-  - Click to load into form
-  - Highlight what each example demonstrates
-- [ ] Implement click-to-load functionality
-- [ ] Document what each example teaches
+**Note:** Pivoted from sidebar to compact dropdown design for better mobile experience
+
+- [x] Create 5 realistic betting scenarios in `lib/examples.ts`
+  - Basic Example: Consecutive lines (28.5 @ -110, 29.5 @ +150)
+  - Gap Scenario: Shows range handling (25.5 @ -150, 27.5 @ +200)
+  - Mixed Over/Under: Direction normalization (48.5 @ +110, Under 49.5 @ -130)
+  - Granular Distribution: 4 lines for detailed breakdown
+  - Wide Spread: Large gap between lines (45.5 @ -200, 50.5 @ +300)
+- [x] Build compact UI with Examples dropdown + toggle button
+  - Dropdown for example selection (replaces sidebar approach)
+  - "+" button to show/hide manual entry form
+  - Manual entry collapses after adding a line
+  - Current Lines always visible with count badge
+- [x] Restructure results card for chart-first display
+  - Move chart above table (primary focus)
+  - Reduce chart height to 150px for compact view
+  - Remove visual separators for cleaner flow
+- [x] Polish layout and spacing
+  - Compact header design
+  - Consistent spacing throughout
+  - Mobile-first responsive design
+- [x] Fix mobile issues
+  - Solid background to fix overscroll white space
+  - Proper viewport handling
+- [x] Document design decisions
+  - Dropdown more space-efficient than sidebar
+  - Chart-first approach for quick insights
+  - Minimal, focused UI for mobile users
 
 ---
 
