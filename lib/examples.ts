@@ -61,5 +61,14 @@ export const EXAMPLE_SCENARIOS: ExampleScenario[] = [
       { direction: 'over', line: 45.5, odds: -200 },
       { direction: 'over', line: 50.5, odds: 300 }
     ]
+  },
+  {
+    id: 'impossible',
+    name: "Impossible Lines",
+    description: "Demonstrates contradictory probabilities - triggers validation error",
+    lines: [
+      { direction: 'over', line: 30.5, odds: -200 },
+      { direction: 'over', line: 29.5, odds: +300 }
+    ]
   }
 ]

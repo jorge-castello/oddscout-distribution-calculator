@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Line } from '@/lib/odds'
 import { calculateProbabilityDistribution } from '@/lib/distribution'
 import { EXAMPLE_SCENARIOS } from '@/lib/examples'
+import { validateLines } from '@/lib/validation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -19,6 +20,7 @@ export default function Home() {
   const [odds, setOdds] = useState('')
   const [selectedExample, setSelectedExample] = useState('brady-basic')
   const [showManualEntry, setShowManualEntry] = useState(false)
+  const [formError, setFormError] = useState('')
 
   // Lines state
   const [lines, setLines] = useState<Line[]>([
@@ -32,10 +34,36 @@ export default function Home() {
     const parsedLine = parseFloat(lineValue)
     const parsedOdds = parseInt(odds)
 
-    if (isNaN(parsedLine) || isNaN(parsedOdds)) {
-      alert('Please enter valid numbers')
+    // Validation
+    if (!lineValue || !odds) {
+      setFormError('Please enter both line and odds')
       return
     }
+
+    if (isNaN(parsedLine)) {
+      setFormError('Line must be a valid number (e.g., 28.5)')
+      return
+    }
+
+    if (isNaN(parsedOdds)) {
+      setFormError('Odds must be a valid number (e.g., -110 or +150)')
+      return
+    }
+
+    if (parsedOdds === 0) {
+      setFormError('Odds cannot be 0')
+      return
+    }
+
+    // Check for duplicate line
+    const duplicateLine = lines.find(l => l.line === parsedLine && l.direction === direction)
+    if (duplicateLine) {
+      setFormError(`A ${direction} ${parsedLine} line already exists. Please remove it first or use a different line value.`)
+      return
+    }
+
+    // Clear any previous errors
+    setFormError('')
 
     setLines([...lines, {
       direction,
@@ -76,6 +104,9 @@ export default function Home() {
   // Calculate distribution
   const distribution = lines.length >= 1 ? calculateProbabilityDistribution(lines) : []
   const total = distribution.reduce((sum, range) => sum + range.probability, 0)
+
+  // Validate lines
+  const validation = validateLines(lines)
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-900 p-4 sm:p-8">
@@ -131,6 +162,17 @@ export default function Home() {
             {showManualEntry && (
               <div className="space-y-4 pt-4 border-t">
                 <h3 className="text-lg font-semibold tracking-tight">Add a betting line:</h3>
+
+                {/* Form Error */}
+                {formError && (
+                  <div className="p-3 rounded-lg border bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200">
+                    <div className="flex items-start gap-2">
+                      <span className="text-lg">⚠️</span>
+                      <p className="text-sm flex-1">{formError}</p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Direction</label>
@@ -152,7 +194,10 @@ export default function Home() {
                       step="0.5"
                       placeholder="28.5"
                       value={lineValue}
-                      onChange={(e) => setLineValue(e.target.value)}
+                      onChange={(e) => {
+                        setLineValue(e.target.value)
+                        setFormError('')
+                      }}
                     />
                   </div>
 
@@ -162,7 +207,10 @@ export default function Home() {
                       type="number"
                       placeholder="-110"
                       value={odds}
-                      onChange={(e) => setOdds(e.target.value)}
+                      onChange={(e) => {
+                        setOdds(e.target.value)
+                        setFormError('')
+                      }}
                     />
                   </div>
                 </div>
@@ -171,6 +219,7 @@ export default function Home() {
                   onClick={handleAddLine}
                   className="w-full sm:w-auto"
                   size="lg"
+                  disabled={!lineValue || !odds}
                 >
                   + Add Line
                 </Button>
@@ -203,6 +252,29 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Validation Warnings */}
+            {validation.issues.length > 0 && (
+              <div className="space-y-2">
+                {validation.issues.map((issue, index) => (
+                  <div
+                    key={index}
+                    className={`p-3 rounded-lg border ${
+                      issue.severity === 'error'
+                        ? 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
+                        : 'bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200'
+                    }`}
+                  >
+                    <div className="flex items-start gap-2">
+                      <span className="text-lg">
+                        {issue.severity === 'error' ? '⚠️' : 'ℹ️'}
+                      </span>
+                      <p className="text-sm flex-1">{issue.message}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>
