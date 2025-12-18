@@ -177,37 +177,40 @@
 
 ---
 
-## Milestone 6: Validation & Polish
+## Milestone 6: Validation & Polish ✅
 **Learning Focus:** Market efficiency, vig/juice, arbitrage
 
-- [ ] Research market efficiency concepts
+- [x] Research market efficiency concepts
   - What is vig (juice)?
   - How to calculate vig from Over/Under on same line
   - What's a "sharp" line vs "public" line?
   - When do arbitrage opportunities exist?
-- [ ] Implement `validateLines(lines: Line[]): ValidationResult`
+- [x] Implement `validateLines(lines: Line[]): ValidationResult`
   - Check for contradictory probabilities
   - Detect when P(Over X) < P(Over X+1) (impossible)
   - Flag negative probabilities
-- [ ] Add warning system
+  - Skip same-line pairs in validation (handled by Market Efficiency section)
+- [x] Add warning system
   - ⚠️ "Lines appear contradictory - check odds"
-  - Highlight negative probabilities in red
-  - Show helpful error messages
-- [ ] **(Optional)** Calculate and display vig
-  - If Over/Under on same line, show bookmaker edge
-  - Educational tooltip explaining vig
-- [ ] **(Optional)** Flag arbitrage opportunities
+  - Show helpful error messages with severity levels
+  - Fixed: "Lines too close" warning doesn't trigger for same-line pairs
+- [x] Calculate and display vig
+  - Created dedicated "Market Efficiency Analysis" card
+  - Shows vig calculation with clear table breakdown
+  - Educational callout explaining bookmaker edge
+- [x] Flag arbitrage opportunities
   - Detect when total implied probability < 100%
-  - Show potential profit opportunity
-- [ ] Test all edge cases thoroughly
+  - Show potential profit opportunity with green callout
+- [x] Test all edge cases thoroughly
   - Negative probabilities
   - Sum > 100% or < 100%
-  - Empty inputs
-  - Invalid odds formats
-- [ ] Write brief technical writeup
-  - How you approached the problem
-  - Key design decisions (flexible input, range handling, etc.)
-  - What you'd improve with more time
+  - Same-line pairs (vig/arbitrage scenarios)
+  - Mixed scenarios (vig + distribution)
+  - Lines close together
+- [x] Write brief technical writeup
+  - Created comprehensive README.md
+  - Covers problem approach, design decisions, and future improvements
+  - Serves as both documentation and technical writeup
 
 ---
 
