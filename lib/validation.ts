@@ -6,6 +6,48 @@
 
 import { Line, oddsToImpliedProbability } from './odds'
 
+/**
+ * Finds all same-line pairs (Over + Under on same line value)
+ * Returns array of line values that have both directions
+ */
+export function findSameLinePairs(lines: Line[]): number[] {
+  const lineGroups = new Map<number, Set<'over' | 'under'>>()
+
+  lines.forEach(line => {
+    if (!lineGroups.has(line.line)) {
+      lineGroups.set(line.line, new Set())
+    }
+    lineGroups.get(line.line)!.add(line.direction)
+  })
+
+  // Return line values that have both Over and Under
+  return Array.from(lineGroups.entries())
+    .filter(([_, directions]) => directions.has('over') && directions.has('under'))
+    .map(([lineValue, _]) => lineValue)
+    .sort((a, b) => a - b)
+}
+
+/**
+ * Checks if we should show probability distribution
+ * Returns true if there are lines at different values OR only one direction per line
+ */
+export function shouldShowDistribution(lines: Line[]): boolean {
+  if (lines.length === 0) return false
+
+  const lineValues = new Set(lines.map(l => l.line))
+
+  // If all lines on same value with both directions, it's pure market analysis
+  if (lineValues.size === 1) {
+    const hasOver = lines.some(l => l.direction === 'over')
+    const hasUnder = lines.some(l => l.direction === 'under')
+    if (hasOver && hasUnder) {
+      return false // Pure market analysis, no distribution
+    }
+  }
+
+  return true // Show distribution for everything else
+}
+
 export type ValidationIssue = {
   type: 'negative_probability' | 'contradictory_probabilities' | 'total_probability' | 'vig' | 'arbitrage'
   message: string
@@ -55,9 +97,13 @@ export function validateLines(lines: Line[]): ValidationResult {
 
   // Check for contradictory probabilities
   // Higher lines should have lower or equal probability
+  // Skip this check for same-line pairs (handled by Market Efficiency analysis)
   for (let i = 0; i < normalized.length - 1; i++) {
     const current = normalized[i]
     const next = normalized[i + 1]
+
+    // Skip if both entries are at the same line value (same-line pair)
+    if (current.line === next.line) continue
 
     if (current.overProbability < next.overProbability) {
       issues.push({
@@ -74,7 +120,9 @@ export function validateLines(lines: Line[]): ValidationResult {
     const next = normalized[i + 1]
     const gap = next.line - current.line
 
-    if (gap < 1.0) {
+    // Only warn if lines are DIFFERENT but close (not same line with both directions)
+    // Same line with both Over/Under is valid for vig/arbitrage analysis
+    if (gap > 0 && gap < 1.0) {
       issues.push({
         type: 'contradictory_probabilities',
         message: `Lines ${current.line} and ${next.line} are very close together (${gap.toFixed(1)} apart). This can create confusing duplicate outcomes in the distribution. Consider using lines at least 1.0 apart.`,
@@ -85,9 +133,14 @@ export function validateLines(lines: Line[]): ValidationResult {
 
   // Check for negative probabilities in the distribution
   // Calculate the probability slices
+  // Skip this check for same-line pairs (handled by Market Efficiency analysis)
   for (let i = 0; i < normalized.length - 1; i++) {
     const current = normalized[i]
     const next = normalized[i + 1]
+
+    // Skip if both entries are at the same line value (same-line pair)
+    if (current.line === next.line) continue
+
     const probability = current.overProbability - next.overProbability
 
     if (probability < 0) {

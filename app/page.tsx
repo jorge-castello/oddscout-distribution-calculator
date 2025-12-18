@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Line } from "@/lib/odds";
+import { Line, oddsToImpliedProbability } from "@/lib/odds";
 import { calculateProbabilityDistribution } from "@/lib/distribution";
 import { EXAMPLE_SCENARIOS } from "@/lib/examples";
-import { validateLines } from "@/lib/validation";
+import { validateLines, findSameLinePairs, shouldShowDistribution } from "@/lib/validation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -133,6 +133,31 @@ export default function Home() {
 
   // Validate lines
   const validation = validateLines(lines);
+
+  // Market efficiency detection
+  const sameLinePairs = findSameLinePairs(lines);
+  const showDist = shouldShowDistribution(lines);
+
+  // Helper to get market efficiency data for a specific line value
+  const getMarketEfficiencyData = (lineValue: number) => {
+    const overLine = lines.find(l => l.line === lineValue && l.direction === 'over');
+    const underLine = lines.find(l => l.line === lineValue && l.direction === 'under');
+
+    if (!overLine || !underLine) return null;
+
+    const overProb = oddsToImpliedProbability(overLine.odds);
+    const underProb = oddsToImpliedProbability(underLine.odds);
+    const totalProb = overProb + underProb;
+
+    return {
+      overProb,
+      underProb,
+      overOdds: overLine.odds,
+      underOdds: underLine.odds,
+      vigOrArbitrage: totalProb > 1 ? 'vig' : 'arbitrage' as const,
+      margin: Math.abs(totalProb - 1)
+    };
+  };
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-900 p-4 sm:p-8">
@@ -295,10 +320,12 @@ export default function Home() {
               </div>
             )}
 
-            {/* Validation Warnings */}
-            {validation.issues.length > 0 && (
+            {/* Validation Warnings - filter out vig/arbitrage since they're shown in Market Efficiency card */}
+            {validation.issues.filter(issue => issue.type !== 'vig' && issue.type !== 'arbitrage').length > 0 && (
               <div className="space-y-2">
-                {validation.issues.map((issue, index) => (
+                {validation.issues
+                  .filter(issue => issue.type !== 'vig' && issue.type !== 'arbitrage')
+                  .map((issue, index) => (
                   <div
                     key={index}
                     className={`p-3 rounded-lg border ${
@@ -326,8 +353,112 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        {/* Results Card */}
-        {distribution.length > 0 && (
+        {/* Market Efficiency Card - shows when same-line pairs exist */}
+        {sameLinePairs.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Market Efficiency Analysis</CardTitle>
+              <CardDescription>
+                Vig and arbitrage calculations for same-line scenarios
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {sameLinePairs.map(lineValue => {
+                  const data = getMarketEfficiencyData(lineValue);
+                  if (!data) return null;
+
+                  const isVig = data.vigOrArbitrage === 'vig';
+                  const marginPct = (data.margin * 100).toFixed(1);
+
+                  return (
+                    <div key={lineValue} className="space-y-3">
+                      {/* Header for this line */}
+                      {sameLinePairs.length > 1 && (
+                        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                          Line {lineValue}
+                        </h3>
+                      )}
+
+                      {/* Table showing breakdown */}
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Bet</TableHead>
+                            <TableHead>Odds</TableHead>
+                            <TableHead className="text-right">Implied Probability</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell className="font-medium">Over {lineValue}</TableCell>
+                            <TableCell className="font-mono text-sm">
+                              {data.overOdds > 0 ? '+' : ''}{data.overOdds}
+                            </TableCell>
+                            <TableCell className="text-right font-mono">
+                              {(data.overProb * 100).toFixed(1)}%
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell className="font-medium">Under {lineValue}</TableCell>
+                            <TableCell className="font-mono text-sm">
+                              {data.underOdds > 0 ? '+' : ''}{data.underOdds}
+                            </TableCell>
+                            <TableCell className="text-right font-mono">
+                              {(data.underProb * 100).toFixed(1)}%
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                        <TableFooter>
+                          <TableRow>
+                            <TableCell className="font-bold">Total</TableCell>
+                            <TableCell></TableCell>
+                            <TableCell className="text-right font-mono font-bold">
+                              {((data.overProb + data.underProb) * 100).toFixed(1)}%
+                            </TableCell>
+                          </TableRow>
+                        </TableFooter>
+                      </Table>
+
+                      {/* Vig/Arbitrage callout */}
+                      <div className={`p-3 rounded-lg border ${
+                        isVig
+                          ? 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800'
+                          : 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800'
+                      }`}>
+                        <div className="flex items-start gap-2">
+                          <span className="text-lg">{isVig ? '💡' : '🎯'}</span>
+                          <div className="flex-1">
+                            <p className={`text-sm font-semibold mb-1 ${
+                              isVig
+                                ? 'text-blue-900 dark:text-blue-100'
+                                : 'text-green-900 dark:text-green-100'
+                            }`}>
+                              {isVig ? `Bookmaker Vig: ${marginPct}%` : `Arbitrage Opportunity: ${marginPct}%`}
+                            </p>
+                            <p className={`text-xs ${
+                              isVig
+                                ? 'text-blue-800 dark:text-blue-200'
+                                : 'text-green-800 dark:text-green-200'
+                            }`}>
+                              {isVig
+                                ? `The bookmaker has a ${marginPct}% edge built into these odds.`
+                                : `You could bet both sides and guarantee a ${marginPct}% profit!`
+                              }
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Probability Distribution Card - shows when lines at different values */}
+        {showDist && distribution.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle>Probability Distribution</CardTitle>
