@@ -5,70 +5,93 @@
  * and help users understand the calculator.
  */
 
-import { Line } from './odds'
+import { Line } from "./odds";
 
 export type ExampleScenario = {
-  id: string
-  name: string
-  description: string
-  lines: Line[]
-}
+  id: string;
+  name: string;
+  description: string;
+  lines: Line[];
+};
 
 export const EXAMPLE_SCENARIOS: ExampleScenario[] = [
   {
-    id: 'brady-basic',
+    id: "basic",
     name: "Basic Example",
-    description: "Basic consecutive lines - perfect for understanding the fundamentals",
+    description:
+      "Basic consecutive lines - perfect for understanding the fundamentals",
     lines: [
-      { direction: 'over', line: 28.5, odds: -110 },
-      { direction: 'over', line: 29.5, odds: 150 }
-    ]
+      { direction: "over", line: 28.5, odds: -110 },
+      { direction: "over", line: 29.5, odds: 150 },
+    ],
   },
   {
-    id: 'gap',
+    id: "gap",
     name: "Gap Scenario",
     description: "Shows range handling when lines skip values (26-27)",
     lines: [
-      { direction: 'over', line: 25.5, odds: -150 },
-      { direction: 'over', line: 27.5, odds: 200 }
-    ]
+      { direction: "over", line: 25.5, odds: -150 },
+      { direction: "over", line: 27.5, odds: 200 },
+    ],
   },
   {
-    id: 'mixed',
+    id: "mixed",
     name: "Mixed Over/Under",
-    description: "Demonstrates direction normalization with both Over and Under lines",
+    description:
+      "Demonstrates direction normalization with both Over and Under lines",
     lines: [
-      { direction: 'over', line: 48.5, odds: 110 },
-      { direction: 'under', line: 49.5, odds: -130 }
-    ]
+      { direction: "over", line: 48.5, odds: 110 },
+      { direction: "under", line: 49.5, odds: -130 },
+    ],
   },
   {
-    id: 'granular',
+    id: "granular",
     name: "Granular Distribution",
     description: "Multiple lines create a detailed probability breakdown",
     lines: [
-      { direction: 'over', line: 27.5, odds: -150 },
-      { direction: 'over', line: 28.5, odds: -110 },
-      { direction: 'over', line: 29.5, odds: 150 },
-      { direction: 'over', line: 30.5, odds: 220 }
-    ]
+      { direction: "over", line: 27.5, odds: -150 },
+      { direction: "over", line: 28.5, odds: -110 },
+      { direction: "over", line: 29.5, odds: 150 },
+      { direction: "over", line: 30.5, odds: 220 },
+    ],
   },
   {
-    id: 'wide-spread',
+    id: "wide-spread",
     name: "Wide Spread",
     description: "Large gap between lines - heavy favorite vs big underdog",
     lines: [
-      { direction: 'over', line: 45.5, odds: -200 },
-      { direction: 'over', line: 50.5, odds: 300 }
-    ]
+      { direction: "over", line: 45.5, odds: -200 },
+      { direction: "over", line: 50.5, odds: 300 },
+    ],
   },
   {
-    id: 'impossible',
+    id: "impossible",
     name: "Impossible Lines",
-    description: "Demonstrates contradictory probabilities - triggers validation error",
+    description:
+      "Demonstrates contradictory probabilities - triggers validation error",
     lines: [
-      { direction: 'over', line: 30.5, odds: -200 },
-      { direction: 'over', line: 29.5, odds: +300 }
-    ]
-  }
-]
+      { direction: "over", line: 30.5, odds: -200 },
+      { direction: "over", line: 29.5, odds: +300 },
+    ],
+  },
+  {
+    id: "market-vig",
+    name: "Market Vig",
+    description:
+      "Shows bookmaker edge (vig) when both Over and Under are available",
+    lines: [
+      { direction: "over", line: 28.5, odds: -110 },
+      { direction: "under", line: 28.5, odds: -110 },
+    ],
+  },
+  {
+    id: "arbitrage",
+    name: "Arbitrage Opportunity",
+    description:
+      "Rare scenario where total probability < 100% (theoretical example)",
+    lines: [
+      { direction: "over", line: 28.5, odds: +120 },
+      { direction: "under", line: 28.5, odds: +110 },
+    ],
+  },
+];

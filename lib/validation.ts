@@ -7,9 +7,9 @@
 import { Line, oddsToImpliedProbability } from './odds'
 
 export type ValidationIssue = {
-  type: 'negative_probability' | 'contradictory_probabilities' | 'total_probability'
+  type: 'negative_probability' | 'contradictory_probabilities' | 'total_probability' | 'vig' | 'arbitrage'
   message: string
-  severity: 'error' | 'warning'
+  severity: 'error' | 'warning' | 'info'
 }
 
 export type ValidationResult = {
@@ -98,6 +98,49 @@ export function validateLines(lines: Line[]): ValidationResult {
       })
     }
   }
+
+  // Check for vig and arbitrage opportunities
+  // Group lines by line value to find Over/Under pairs
+  const lineGroups = new Map<number, { over?: Line, under?: Line }>()
+
+  lines.forEach(line => {
+    if (!lineGroups.has(line.line)) {
+      lineGroups.set(line.line, {})
+    }
+    const group = lineGroups.get(line.line)!
+    if (line.direction === 'over') {
+      group.over = line
+    } else {
+      group.under = line
+    }
+  })
+
+  // Check each line value for vig or arbitrage
+  lineGroups.forEach((group, lineValue) => {
+    if (group.over && group.under) {
+      const overProb = oddsToImpliedProbability(group.over.odds)
+      const underProb = oddsToImpliedProbability(group.under.odds)
+      const totalProb = overProb + underProb
+
+      if (totalProb > 1.0) {
+        // Vig detected (bookmaker edge)
+        const vig = (totalProb - 1.0) * 100
+        issues.push({
+          type: 'vig',
+          message: `Line ${lineValue} shows ${vig.toFixed(1)}% vig (bookmaker edge). Over: ${(overProb * 100).toFixed(1)}% + Under: ${(underProb * 100).toFixed(1)}% = ${(totalProb * 100).toFixed(1)}%`,
+          severity: 'info'
+        })
+      } else if (totalProb < 1.0) {
+        // Arbitrage opportunity detected
+        const arbitrageMargin = (1.0 - totalProb) * 100
+        issues.push({
+          type: 'arbitrage',
+          message: `Arbitrage opportunity on line ${lineValue}! Total implied probability is ${(totalProb * 100).toFixed(1)}% (${arbitrageMargin.toFixed(1)}% margin). You could bet both sides and guarantee a profit.`,
+          severity: 'info'
+        })
+      }
+    }
+  })
 
   return {
     isValid: issues.filter(i => i.severity === 'error').length === 0,

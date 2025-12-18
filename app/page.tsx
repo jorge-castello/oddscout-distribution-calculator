@@ -1,112 +1,138 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Line } from '@/lib/odds'
-import { calculateProbabilityDistribution } from '@/lib/distribution'
-import { EXAMPLE_SCENARIOS } from '@/lib/examples'
-import { validateLines } from '@/lib/validation'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Separator } from '@/components/ui/separator'
-import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts'
+import { useState } from "react";
+import { Line } from "@/lib/odds";
+import { calculateProbabilityDistribution } from "@/lib/distribution";
+import { EXAMPLE_SCENARIOS } from "@/lib/examples";
+import { validateLines } from "@/lib/validation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { BarChart, Bar, XAxis, ResponsiveContainer } from "recharts";
 
 export default function Home() {
   // Form state
-  const [direction, setDirection] = useState<'over' | 'under'>('over')
-  const [lineValue, setLineValue] = useState('')
-  const [odds, setOdds] = useState('')
-  const [selectedExample, setSelectedExample] = useState('brady-basic')
-  const [showManualEntry, setShowManualEntry] = useState(false)
-  const [formError, setFormError] = useState('')
+  const [direction, setDirection] = useState<"over" | "under">("over");
+  const [lineValue, setLineValue] = useState("");
+  const [odds, setOdds] = useState("");
+  const [selectedExample, setSelectedExample] = useState("basic");
+  const [showManualEntry, setShowManualEntry] = useState(false);
+  const [formError, setFormError] = useState("");
 
   // Lines state
   const [lines, setLines] = useState<Line[]>([
-    // Start with Brady's example
-    { direction: 'over', line: 28.5, odds: -110 },
-    { direction: 'over', line: 29.5, odds: 150 }
-  ])
+    { direction: "over", line: 28.5, odds: -110 },
+    { direction: "over", line: 29.5, odds: 150 },
+  ]);
 
   // Add a new line
   const handleAddLine = () => {
-    const parsedLine = parseFloat(lineValue)
-    const parsedOdds = parseInt(odds)
+    const parsedLine = parseFloat(lineValue);
+    const parsedOdds = parseInt(odds);
 
     // Validation
     if (!lineValue || !odds) {
-      setFormError('Please enter both line and odds')
-      return
+      setFormError("Please enter both line and odds");
+      return;
     }
 
     if (isNaN(parsedLine)) {
-      setFormError('Line must be a valid number (e.g., 28.5)')
-      return
+      setFormError("Line must be a valid number (e.g., 28.5)");
+      return;
     }
 
     if (isNaN(parsedOdds)) {
-      setFormError('Odds must be a valid number (e.g., -110 or +150)')
-      return
+      setFormError("Odds must be a valid number (e.g., -110 or +150)");
+      return;
     }
 
     if (parsedOdds === 0) {
-      setFormError('Odds cannot be 0')
-      return
+      setFormError("Odds cannot be 0");
+      return;
     }
 
     // Check for duplicate line
-    const duplicateLine = lines.find(l => l.line === parsedLine && l.direction === direction)
+    const duplicateLine = lines.find(
+      (l) => l.line === parsedLine && l.direction === direction
+    );
     if (duplicateLine) {
-      setFormError(`A ${direction} ${parsedLine} line already exists. Please remove it first or use a different line value.`)
-      return
+      setFormError(
+        `A ${direction} ${parsedLine} line already exists. Please remove it first or use a different line value.`
+      );
+      return;
     }
 
     // Clear any previous errors
-    setFormError('')
+    setFormError("");
 
-    setLines([...lines, {
-      direction,
-      line: parsedLine,
-      odds: parsedOdds
-    }])
+    setLines([
+      ...lines,
+      {
+        direction,
+        line: parsedLine,
+        odds: parsedOdds,
+      },
+    ]);
 
     // Reset form
-    setLineValue('')
-    setOdds('')
+    setLineValue("");
+    setOdds("");
 
     // Collapse manual entry
-    setShowManualEntry(false)
-  }
+    setShowManualEntry(false);
+  };
 
   // Remove a line
   const handleRemoveLine = (index: number) => {
-    setLines(lines.filter((_, i) => i !== index))
-  }
+    setLines(lines.filter((_, i) => i !== index));
+  };
 
   // Load an example scenario
   const loadExample = (exampleLines: Line[]) => {
-    setLines(exampleLines)
+    setLines(exampleLines);
     // Reset form inputs
-    setLineValue('')
-    setOdds('')
-  }
+    setLineValue("");
+    setOdds("");
+  };
 
   // Handle example selection from dropdown
   const handleExampleChange = (exampleId: string) => {
-    setSelectedExample(exampleId)
-    const example = EXAMPLE_SCENARIOS.find(ex => ex.id === exampleId)
+    setSelectedExample(exampleId);
+    const example = EXAMPLE_SCENARIOS.find((ex) => ex.id === exampleId);
     if (example) {
-      loadExample(example.lines)
+      loadExample(example.lines);
     }
-  }
+  };
 
   // Calculate distribution
-  const distribution = lines.length >= 1 ? calculateProbabilityDistribution(lines) : []
-  const total = distribution.reduce((sum, range) => sum + range.probability, 0)
+  const distribution =
+    lines.length >= 1 ? calculateProbabilityDistribution(lines) : [];
+  const total = distribution.reduce((sum, range) => sum + range.probability, 0);
 
   // Validate lines
-  const validation = validateLines(lines)
+  const validation = validateLines(lines);
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-900 p-4 sm:p-8">
@@ -132,9 +158,14 @@ export default function Home() {
           <CardContent className="space-y-6">
             {/* Examples & Add Lines Button */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Examples:</label>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Examples:
+              </label>
               <div className="flex gap-2">
-                <Select value={selectedExample} onValueChange={handleExampleChange} className="flex-1">
+                <Select
+                  value={selectedExample}
+                  onValueChange={handleExampleChange}
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Load an example..." />
                   </SelectTrigger>
@@ -153,7 +184,7 @@ export default function Home() {
                   onClick={() => setShowManualEntry(!showManualEntry)}
                   className="px-4"
                 >
-                  {showManualEntry ? '−' : '+'}
+                  {showManualEntry ? "−" : "+"}
                 </Button>
               </div>
             </div>
@@ -161,7 +192,9 @@ export default function Home() {
             {/* Manual Entry Form - Slides in when button clicked */}
             {showManualEntry && (
               <div className="space-y-4 pt-4 border-t">
-                <h3 className="text-lg font-semibold tracking-tight">Add a betting line:</h3>
+                <h3 className="text-lg font-semibold tracking-tight">
+                  Add a betting line:
+                </h3>
 
                 {/* Form Error */}
                 {formError && (
@@ -176,7 +209,12 @@ export default function Home() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Direction</label>
-                    <Select value={direction} onValueChange={(val) => setDirection(val as 'over' | 'under')}>
+                    <Select
+                      value={direction}
+                      onValueChange={(val) =>
+                        setDirection(val as "over" | "under")
+                      }
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -195,8 +233,8 @@ export default function Home() {
                       placeholder="28.5"
                       value={lineValue}
                       onChange={(e) => {
-                        setLineValue(e.target.value)
-                        setFormError('')
+                        setLineValue(e.target.value);
+                        setFormError("");
                       }}
                     />
                   </div>
@@ -208,8 +246,8 @@ export default function Home() {
                       placeholder="-110"
                       value={odds}
                       onChange={(e) => {
-                        setOdds(e.target.value)
-                        setFormError('')
+                        setOdds(e.target.value);
+                        setFormError("");
                       }}
                     />
                   </div>
@@ -239,7 +277,9 @@ export default function Home() {
                       className="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-3 rounded-lg"
                     >
                       <span className="font-mono text-sm">
-                        {line.direction === 'over' ? 'Over' : 'Under'} {line.line} @ {line.odds > 0 ? '+' : ''}{line.odds}
+                        {line.direction === "over" ? "Over" : "Under"}{" "}
+                        {line.line} @ {line.odds > 0 ? "+" : ""}
+                        {line.odds}
                       </span>
                       <Button
                         variant="ghost"
@@ -262,14 +302,20 @@ export default function Home() {
                   <div
                     key={index}
                     className={`p-3 rounded-lg border ${
-                      issue.severity === 'error'
-                        ? 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
-                        : 'bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200'
+                      issue.severity === "error"
+                        ? "bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200"
+                        : issue.severity === "warning"
+                        ? "bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200"
+                        : "bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200"
                     }`}
                   >
                     <div className="flex items-start gap-2">
                       <span className="text-lg">
-                        {issue.severity === 'error' ? '⚠️' : 'ℹ️'}
+                        {issue.severity === "error"
+                          ? "⚠️"
+                          : issue.severity === "warning"
+                          ? "ℹ️"
+                          : "💡"}
                       </span>
                       <p className="text-sm flex-1">{issue.message}</p>
                     </div>
@@ -286,25 +332,30 @@ export default function Home() {
             <CardHeader>
               <CardTitle>Probability Distribution</CardTitle>
               <CardDescription>
-                Calculated from {lines.length} betting line{lines.length !== 1 ? 's' : ''}
+                Calculated from {lines.length} betting line
+                {lines.length !== 1 ? "s" : ""}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {/* Chart visualization */}
               <div className="outline-none focus:outline-none select-none">
-                <ResponsiveContainer width="100%" height={150} className="outline-none focus:outline-none select-none">
+                <ResponsiveContainer
+                  width="100%"
+                  height={150}
+                  className="outline-none focus:outline-none select-none"
+                >
                   <BarChart
-                    data={distribution.map(range => ({
+                    data={distribution.map((range) => ({
                       outcome: range.label,
-                      probability: range.probability * 100
+                      probability: range.probability * 100,
                     }))}
                     margin={{ left: 10, right: 10, top: 20, bottom: 5 }}
-                    style={{ cursor: 'default' }}
+                    style={{ cursor: "default" }}
                   >
                     <XAxis
                       dataKey="outcome"
-                      tick={{ fill: 'currentColor', fontFamily: 'inherit' }}
-                      style={{ fontSize: '14px' }}
+                      tick={{ fill: "currentColor", fontFamily: "inherit" }}
+                      style={{ fontSize: "14px" }}
                     />
                     <Bar
                       dataKey="probability"
@@ -312,12 +363,15 @@ export default function Home() {
                       radius={[8, 8, 0, 0]}
                       isAnimationActive={false}
                       label={{
-                        position: 'top',
-                        formatter: (value: number) => `${value.toFixed(1)}%`,
-                        fill: 'currentColor',
-                        fontFamily: 'ui-monospace, monospace',
+                        position: "top",
+                        formatter: (value) =>
+                          typeof value === "number"
+                            ? `${value.toFixed(1)}%`
+                            : "",
+                        fill: "currentColor",
+                        fontFamily: "ui-monospace, monospace",
                         fontSize: 13,
-                        fontWeight: 500
+                        fontWeight: 500,
                       }}
                     />
                   </BarChart>
@@ -336,7 +390,9 @@ export default function Home() {
                   <TableBody>
                     {distribution.map((range, index) => (
                       <TableRow key={index}>
-                        <TableCell className="font-medium">{range.label}</TableCell>
+                        <TableCell className="font-medium">
+                          {range.label}
+                        </TableCell>
                         <TableCell className="text-right font-mono">
                           {(range.probability * 100).toFixed(2)}%
                         </TableCell>
@@ -358,5 +414,5 @@ export default function Home() {
         )}
       </div>
     </div>
-  )
+  );
 }
