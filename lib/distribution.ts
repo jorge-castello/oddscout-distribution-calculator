@@ -52,23 +52,51 @@ export function calculateProbabilityDistribution(lines: Line[]): OutcomeRange[] 
     return []
   }
 
-  // Step 1: Normalize all lines to "Over" probabilities
-  const normalized: NormalizedLine[] = lines.map(line => {
+  // Step 1: Group lines by line value and merge same-line pairs
+  // When both Over and Under exist for the same line, use no-vig probability
+  const lineGroups = new Map<number, { over?: number, under?: number }>()
+
+  lines.forEach(line => {
     const impliedProb = oddsToImpliedProbability(line.odds)
-
-    // If it's an "under" line, convert to "over"
-    // P(Over X) = 1 - P(Under X)
-    const overProbability = line.direction === 'under'
-      ? 1 - impliedProb
-      : impliedProb
-
-    return {
-      line: line.line,
-      overProbability
+    if (!lineGroups.has(line.line)) {
+      lineGroups.set(line.line, {})
+    }
+    const group = lineGroups.get(line.line)!
+    if (line.direction === 'over') {
+      group.over = impliedProb
+    } else {
+      group.under = impliedProb
     }
   })
 
-  // Step 2: Sort by line number (ascending)
+  // Step 2: Create normalized lines, merging same-line pairs with no-vig probability
+  const normalized: NormalizedLine[] = []
+
+  lineGroups.forEach((group, lineValue) => {
+    let overProbability: number
+
+    if (group.over !== undefined && group.under !== undefined) {
+      // Both Over and Under exist - calculate no-vig probability
+      // noVigOverProb = overProb / (overProb + underProb)
+      const totalProb = group.over + group.under
+      overProbability = group.over / totalProb
+    } else if (group.over !== undefined) {
+      // Only Over exists
+      overProbability = group.over
+    } else if (group.under !== undefined) {
+      // Only Under exists - convert to Over
+      overProbability = 1 - group.under
+    } else {
+      return // Skip if no valid data
+    }
+
+    normalized.push({
+      line: lineValue,
+      overProbability
+    })
+  })
+
+  // Step 3: Sort by line number (ascending)
   normalized.sort((a, b) => a.line - b.line)
 
   // Step 3: Calculate probability ranges
