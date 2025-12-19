@@ -87,14 +87,17 @@ export default function Home() {
     // Clear any previous errors
     setFormError("");
 
-    setLines([
+    // Add line and sort by line value
+    const newLines = [
       ...lines,
       {
         direction,
         line: parsedLine,
         odds: parsedOdds,
       },
-    ]);
+    ];
+    newLines.sort((a, b) => a.line - b.line);
+    setLines(newLines);
 
     // Reset form
     setLineValue("");
