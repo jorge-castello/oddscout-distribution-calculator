@@ -29,23 +29,10 @@ export function findSameLinePairs(lines: Line[]): number[] {
 
 /**
  * Checks if we should show probability distribution
- * Returns true if there are lines at different values OR only one direction per line
+ * Always returns true if lines exist (distribution uses normalized probabilities for same-line pairs)
  */
 export function shouldShowDistribution(lines: Line[]): boolean {
-  if (lines.length === 0) return false
-
-  const lineValues = new Set(lines.map(l => l.line))
-
-  // If all lines on same value with both directions, it's pure market analysis
-  if (lineValues.size === 1) {
-    const hasOver = lines.some(l => l.direction === 'over')
-    const hasUnder = lines.some(l => l.direction === 'under')
-    if (hasOver && hasUnder) {
-      return false // Pure market analysis, no distribution
-    }
-  }
-
-  return true // Show distribution for everything else
+  return lines.length > 0
 }
 
 export type ValidationIssue = {

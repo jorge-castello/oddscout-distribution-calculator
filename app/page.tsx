@@ -461,10 +461,18 @@ export default function Home() {
         {showDist && distribution.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Probability Distribution</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Probability Distribution</CardTitle>
+                {sameLinePairs.length > 0 && (
+                  <span className="px-2 py-1 text-xs font-medium rounded-md bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
+                    Normalized
+                  </span>
+                )}
+              </div>
               <CardDescription>
                 Calculated from {lines.length} betting line
                 {lines.length !== 1 ? "s" : ""}
+                {sameLinePairs.length > 0 && " · Market edge removed"}
               </CardDescription>
             </CardHeader>
             <CardContent>
